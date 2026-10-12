@@ -165,6 +165,7 @@ Held out (per-clone additions when needed): KaTeX, shadcn components, any chart 
 - `<DeckShell>{slides}</DeckShell>` — no props at the top level; configuration lives in the reveal config module.
 - `useFragment(): { index: number; total: number; isVisible: (n: number) => boolean }`
 - `useStep(['idle', 'shown', 'done'] as const): 'idle' | 'shown' | 'done'` — the slide's fragment progress as a named step, for Motion's `animate`.
+- `useSlideActive(): boolean` — whether this slide is the one being presented; gate Motion entrance animations on it, since every slide mounts at deck load.
 - `<Code lang="ts" steps={[{ lines: "1-3" }, { lines: "5", focus: true }]}>{source}</Code>`
 - `<Diagram viewBox="0 0 1920 1080">{children}</Diagram>`
 - `<AnimatedArrow from={pointA} to={pointB} appear="draw" color="chart-1" />`
