@@ -21,7 +21,7 @@ The scaffold provides:
 - **Authoring model**: hybrid JSX-first. Every slide is a `<Slide>` component holding any JSX. Helper components — `<Code>`, `<Image>`, `<Diagram>`, `<Demo>`, `<IframeDemo>` — handle the recurring patterns. Start with all slides in `App.tsx`, evolve to per-slide files only when needed.
 - **Code blocks**: `<Code>` powered by Shiki (VS Code-quality output), with a step-through mode that reveals lines or ranges as fragments advance.
 - **Diagram primitives**: `<Diagram>` (themed SVG canvas), `<AnimatedArrow>` (draw-on or move-between behavior), `<AnimatedBox>` (fragment-aware highlight states). Diagrams can also be drawn in Excalidraw and dropped in as SVG/PNG exports.
-- **Animation vocabulary**: reveal-native fragments + Auto-Animate by default. A `useFragment()` hook gives React components access to fragment state for fragment-driven logic. Framer Motion is intentionally not pre-installed; it can be added per-clone when a specific deck demands sequenced choreography reveal can't express.
+- **Animation vocabulary**: reveal-native fragments + Auto-Animate for slide-level motion. A `useFragment()` hook gives React components access to fragment state for fragment-driven logic. [Motion](https://motion.dev) (formerly Framer Motion) is pre-installed for component-level choreography — springs, squash & stretch, staggering, exit animations — and `useStep()` maps a slide's fragments onto named Motion states.
 - **Speaker view**: reveal's Notes plugin wired so pressing `s` opens a second window with notes, a timer, and a next-slide preview.
 - **PDF export**: `bun run pdf` spawns the dev server, drives headless Chromium against `?print-pdf`, and writes `slides.pdf` at the configured logical dimensions.
 
@@ -108,10 +108,10 @@ The scaffold provides:
 
 ### Dependency list (default install)
 
-Production: `react`, `react-dom`, `reveal.js`, `shiki`, `clsx`, `tailwind-merge`, `lucide-react`.
+Production: `react`, `react-dom`, `reveal.js`, `shiki`, `motion`, `clsx`, `tailwind-merge`, `lucide-react`.
 Development: `vite`, `@vitejs/plugin-react`, `typescript`, `tailwindcss`, `postcss`, `autoprefixer`, `eslint`, `prettier`, `@types/react`, `@types/react-dom`, `vitest`, `@testing-library/react`, `jsdom`, `puppeteer` (for PDF script).
 
-Held out (per-clone additions when needed): Framer Motion, KaTeX, shadcn components, any chart library.
+Held out (per-clone additions when needed): KaTeX, shadcn components, any chart library.
 
 ### Module breakdown
 
@@ -164,6 +164,7 @@ Held out (per-clone additions when needed): Framer Motion, KaTeX, shadcn compone
 
 - `<DeckShell>{slides}</DeckShell>` — no props at the top level; configuration lives in the reveal config module.
 - `useFragment(): { index: number; total: number; isVisible: (n: number) => boolean }`
+- `useStep(['idle', 'shown', 'done'] as const): 'idle' | 'shown' | 'done'` — the slide's fragment progress as a named step, for Motion's `animate`.
 - `<Code lang="ts" steps={[{ lines: "1-3" }, { lines: "5", focus: true }]}>{source}</Code>`
 - `<Diagram viewBox="0 0 1920 1080">{children}</Diagram>`
 - `<AnimatedArrow from={pointA} to={pointB} appear="draw" color="chart-1" />`
@@ -249,7 +250,7 @@ Held out (per-clone additions when needed): Framer Motion, KaTeX, shadcn compone
 - **Workflow assumption**: the canonical lifecycle is `git clone <scaffold> my-talk && cd my-talk && bun install && bun dev`. There is no `npx create-…` CLI; the scaffold itself is the artifact.
 - **HMR caveat**: reveal.js + React 18 + Vite HMR has known quirks (double-mount on StrictMode, stale plugin state). All of this is encapsulated in `DeckShell`. Slide-author code must NOT call `Reveal.initialize()` or import the reveal global directly.
 - **Why no Highlight plugin**: Shiki is strictly better for code presentation than reveal's bundled highlight.js plugin, and the step-through helper depends on Shiki's tokenization.
-- **Why Auto-Animate over Framer Motion**: reveal's Auto-Animate gives Keynote-style "Magic Move" between adjacent slides for free, and covers ~80% of the diagram-animation use cases this user has. Framer Motion is reserved for the cases where reveal-native vocabulary runs out (sequenced choreography on a single fragment trigger, spring physics, SVG path morphing).
+- **Auto-Animate and Motion, side by side**: reveal's Auto-Animate gives Keynote-style "Magic Move" between adjacent slides for free and stays the default for slide-to-slide morphs. Motion covers what reveal-native vocabulary can't: sequenced choreography on a single fragment trigger, spring physics, squash & stretch, exit animations, SVG path drawing. It was originally held out to keep the default install minimal, but hand-rolling that choreography in CSS keyframes proved fragile (animation-name matching, fill-mode stacking, manual delay arithmetic), so it now ships with the scaffold. Simple fades and static diagrams should still stay plain CSS/reveal.
 - **Why no shadcn components**: the scaffold renders presentation content, not application UI. The shadcn-flavored CSS variables and `cn` helper are borrowed because they're convention-friendly and any per-clone shadcn additions will integrate cleanly.
 - **Theme variables source**: provided verbatim by the user during the design interview (Nord daisyUI shadcn style, light + dark, with chart and sidebar scales).
 - **Single-author assumption**: no PR review process, no shared style guide enforcement, no multi-contributor concerns baked into tooling.
