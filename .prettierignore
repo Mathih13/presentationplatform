@@ -2,3 +2,5 @@ node_modules
 dist
 bun.lock
 bun.lockb
+# Speaker notes are hand-written prose; Prettier would rewrite *italics* as _italics_.
+*.notes.md
