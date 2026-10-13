@@ -9,19 +9,14 @@ import { PivotSpace } from './PivotSpace';
 //   people → who holds each ring; a ring lights up as its row of people is revealed
 //   drift  → every ring turns at its own speed and direction (code fast, industry barely),
 //            so "ulik fart, ulik retning" is something the room watches happen
-//   agent  → what an AI agent sees, held still: the two inner rings, the domain faded, and the
-//            outer rings greyed out — the agent barely sees them
 //
 // The SVG is square and centred on the rings, so a slide can place it anywhere and reveal's
 // auto-animate can move it between slides.
 
-export type RingsMode = 'people' | 'drift' | 'agent';
+export type RingsMode = 'people' | 'drift';
 
 const INK = '#1e1e1e';
-const GREY = '#e5e9f0';
-const AGENT = '#d97757';
 const FONT = 'Open Sans, system-ui, sans-serif';
-const SEEN_BY_AGENT = 2; // Kode + Team
 
 const innerOf = (i: number) => (i === 0 ? 0 : RINGS[i - 1]!.r);
 const midOf = (i: number) => (i === 0 ? 66 : (RINGS[i]!.r + innerOf(i)) / 2);
@@ -101,7 +96,6 @@ export function LivingRings({
 }) {
   const prefix = useId().replace(/:/g, '');
   const outer = RINGS[RINGS.length - 1]!.r;
-  const greyed = (i: number) => mode === 'agent' && i >= SEEN_BY_AGENT + 1;
   return (
     <svg
       viewBox={`${-outer - 8} ${-outer - 8} ${2 * outer + 16} ${2 * outer + 16}`}
@@ -118,20 +112,17 @@ export function LivingRings({
               <motion.circle
                 key={ring.name}
                 r={ring.r}
-                fill={greyed(i) ? GREY : ring.fill}
+                fill={ring.fill}
                 stroke={INK}
                 initial={false}
-                animate={{
-                  strokeWidth: lit ? [3, 12, 3] : 3,
-                  opacity: mode === 'agent' && i === SEEN_BY_AGENT ? 0.7 : 1,
-                }}
+                animate={{ strokeWidth: lit ? [3, 12, 3] : 3 }}
                 transition={{ duration: lit ? 0.9 : 0.3, ease: 'easeOut' }}
               />
             );
           })}
 
-          {/* labels: horizontal and still for "who holds it"; riding the bands, turning only in drift */}
-          {mode !== 'drift' || !active ? (
+          {/* labels: horizontal and still for "who holds it"; riding the bands when they move */}
+          {mode === 'people' || !active ? (
             RINGS.map((ring, i) =>
               mode === 'people' ? (
                 <text
@@ -151,24 +142,6 @@ export function LivingRings({
             )
           ) : (
             <Moving />
-          )}
-
-          {/* the agent, in the middle of what it can see */}
-          {mode === 'agent' && (
-            <g>
-              <circle cx={0} cy={-56} r={30} fill={AGENT} stroke={INK} strokeWidth={3} />
-              <text
-                x={0}
-                y={-48}
-                textAnchor="middle"
-                fill="#ffffff"
-                fontSize={20}
-                fontFamily={FONT}
-                fontWeight={700}
-              >
-                Agent
-              </text>
-            </g>
           )}
         </PivotSpace>
       </IdPrefix.Provider>

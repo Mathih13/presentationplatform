@@ -9,7 +9,7 @@ const FONT = 'Open Sans, system-ui, sans-serif';
 const FG = 'hsl(var(--foreground))';
 const MUTED = 'hsl(var(--muted-foreground))';
 const HUMAN = 'hsl(var(--chart-2))';
-const AGENT = '#d97757';
+const AGENT = 'hsl(var(--primary))';
 
 const LEFT = 320;
 const RIGHT = 1840;

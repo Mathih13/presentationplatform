@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useLayoutEffect } from 'react';
+import { motion } from 'motion/react';
 import { DeckShell } from '../deck/DeckShell';
 import notes from './AktFaglunsj.notes.md?raw';
 import { Image } from '../deck/Image';
 import { Slide } from '../deck/Slide';
 import { useFragment } from '../deck/useFragment';
 import { useSlideActive } from '../deck/useSlideActive';
-import { useStep } from '../deck/useStep';
 import { LivingRings, RingsLegend } from '../diagrams/LivingRings';
 import { RINGS } from '../diagrams/contextRings';
 import { BonsaiJourney } from '../diagrams/BonsaiJourney';
@@ -22,10 +21,9 @@ import { TempoLanes } from '../diagrams/TempoLanes';
 // owns it, as a property of the team. The garden metaphor from Act 1 pays off in Act 4
 // as a bonsai: context grows by itself; the team's job is pruning.
 // Assets from the Keynote «Konteksthåndtering — Fra Jacquard til Claude» live in
-// public/slides/akt/. Speaker notes live in AktFaglunsj.notes.md, one section per slide id;
-// each opens with the speaker and a time cue.
+// public/slides/akt/. Speaker notes live in AktFaglunsj.notes.md, one section per slide id.
 
-const SPEAKERS = 'Mathias Hartveit · Kollega'; // TODO: colleague's name
+const SPEAKERS = 'Nicklas · Mathias';
 
 const ROLES = [
   { src: '/slides/akt/monsterdesigner.jpg', label: 'Mønsterdesigneren' },
@@ -40,24 +38,14 @@ const BETS = [
   { name: 'Med AI', line: 'Felles kontekst' },
 ];
 
-const SHARED_PROJECT = {
-  name: 'Billett og takst',
-  sharedWith: 'billett, kundesenter og utvikling',
-  // Illustrative only — replace with real AKT rules, or keep them this generic.
-  instructions: [
-    'Takster og soner følger fylkeskommunens vedtak. Se takstregulativet.',
-    'Skoleruter har egen ordning. Endringer avklares med billettavdelingen.',
-    'Forklar hvorfor en regel finnes.',
-  ],
-  knowledge: ['Takstregulativ.pdf', 'Unntak og særordninger.md', 'Beslutningslogg.md'],
-};
-
 // Per role: what the agent does for you alone, and how you tend the shared context.
 const ROLE_PRACTICES = [
   { role: 'Utvikler', alone: 'Koden', together: 'Reglene' },
   { role: 'Fagperson', alone: 'Hull og unntak', together: 'Fagkunnskapen' },
   { role: 'Leder', alone: 'Idéene', together: 'Beslutningene' },
 ];
+
+const GEAR = 'hsl(var(--primary))';
 
 // A plain gear: a ring with eight teeth. Marks a role as automated — it pops in when the slide
 // is presented, then keeps turning (neighbouring gears turn opposite ways).
@@ -86,11 +74,11 @@ function Gear({ index, active }: { index: number; active: boolean }) {
             width={18}
             height={20}
             rx={3}
-            fill="#f28b9a"
+            fill={GEAR}
             transform={`rotate(${i * 45})`}
           />
         ))}
-        <circle r={30} fill="none" stroke="#f28b9a" strokeWidth={18} />
+        <circle r={30} fill="none" stroke={GEAR} strokeWidth={18} />
       </motion.svg>
     </motion.div>
   );
@@ -105,7 +93,8 @@ function RoleTriptych({ automated, active = false }: { automated: boolean; activ
             <img src={role.src} alt={role.label} className="h-full w-full object-cover" />
             {automated && i > 0 && (
               <motion.div
-                className="absolute inset-0 flex items-center justify-center bg-black/30"
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ background: 'hsl(var(--background) / 0.55)' }}
                 initial={false}
                 animate={{ opacity: active ? 1 : 0 }}
                 transition={{ duration: active ? 0.6 : 0, delay: active ? 0.3 + i * 0.3 : 0 }}
@@ -127,8 +116,8 @@ function RolesSplitting() {
   return <RoleTriptych automated active={useSlideActive()} />;
 }
 
-// The third bet: an open "?" in Act 2 (pulsing while presented); in Act 4 the "?" spins away
-// and the answer reveals itself line by line.
+// The third bet: left empty in Act 2; in Act 4 a "?" spins away and the answer reveals itself
+// line by line.
 function Bets({ answered }: { answered: boolean }) {
   const active = useSlideActive();
   const snap = { duration: 0 };
@@ -142,25 +131,7 @@ function Bets({ answered }: { answered: boolean }) {
       <div className="flex gap-16 text-left">
         {BETS.map((bet, i) => {
           const third = i === 2;
-          if (third && !answered) {
-            return (
-              <div key={bet.name} className="flex-1">
-                <motion.h3
-                  className="text-primary-foreground mb-10 inline-block text-6xl"
-                  animate={
-                    active
-                      ? { scale: [1, 1.12, 1], opacity: [1, 0.7, 1] }
-                      : { scale: 1, opacity: 1 }
-                  }
-                  transition={
-                    active ? { duration: 2.4, ease: 'easeInOut', repeat: Infinity } : snap
-                  }
-                >
-                  ?
-                </motion.h3>
-              </div>
-            );
-          }
+          if (third && !answered) return <div key={bet.name} className="flex-1" />;
           return (
             <div key={bet.name} className="relative flex-1">
               {third && (
@@ -217,19 +188,19 @@ function PeopleMapSlide() {
   );
 }
 
-function RingsSlide({ mode }: { mode: 'drift' | 'agent' }) {
+function RingsSlide() {
   return (
     <div className="flex h-[1080px] items-center justify-center">
       <div data-id="context-rings" className="h-[940px] w-[940px]">
-        <LivingRings mode={mode} active={useSlideActive()} />
+        <LivingRings mode="drift" active={useSlideActive()} />
       </div>
     </div>
   );
 }
 
 // Diagrams with continuous motion only run while their slide is on screen.
-function TeamSlide({ mode }: { mode: TeamMode }) {
-  return <TeamContext mode={mode} active={useSlideActive()} />;
+function TeamSlide({ mode, sharedLabel }: { mode: TeamMode; sharedLabel?: string }) {
+  return <TeamContext mode={mode} active={useSlideActive()} sharedLabel={sharedLabel} />;
 }
 function TempoSlideLanes() {
   return <TempoLanes active={useSlideActive()} />;
@@ -297,86 +268,39 @@ function ContextDriftText() {
 // The garden payoff: a camera journey through an illustrated bonsai, from the roots up to one
 // overgrown branch the team prunes, then out to the whole tree dimmed into the background.
 // One line of text per stop; all three return together on the overview.
-const HAGEN_STEPS = ['roots', 'trunk', 'prune', 'overview'] as const;
 const HAGEN_LINES = [
-  {
-    step: 'roots',
-    text: 'Koden er ikke en hage.',
-    className: 'text-secondary-foreground text-6xl',
-  },
-  { step: 'trunk', text: 'Konteksten er det.', className: 'text-primary-foreground text-7xl' },
-  {
-    step: 'prune',
-    text: 'Beskjæring',
-    className: 'text-primary-foreground text-6xl',
-  },
-] as const;
+  { text: 'Konteksten vokser av seg selv.', className: 'text-secondary-foreground text-6xl' },
+  { text: 'Teamets jobb er å beskjære.', className: 'text-primary-foreground text-7xl' },
+];
 
+// The bonsai's final frame — the whole tree, dimmed — behind the three lines.
 function HagenSlide() {
-  const step = useStep(HAGEN_STEPS);
-  const active = useSlideActive();
-  const line = HAGEN_LINES.find((l) => l.step === step);
-  // The overview's lines wait for the camera to pull back — unless we arrive from elsewhere.
-  const [from, setFrom] = useState({ step, prev: step });
-  if (from.step !== step) setFrom({ step, prev: from.step });
-  const pulledBack =
-    step === 'overview' && (from.step !== step ? from.step : from.prev) === 'prune';
   return (
     <div className="relative h-[1080px] overflow-hidden">
-      <BonsaiJourney step={step} active={active} />
-      <div className="absolute inset-y-0 left-32 flex flex-col justify-center whitespace-nowrap text-left">
-        <AnimatePresence mode="wait">
-          {line ? (
-            <motion.p
-              key={line.step}
-              className={line.className}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.7, delay: 0.8, ease: 'easeOut' },
-              }}
-              exit={{ opacity: 0, y: -12, transition: { duration: 0.3 } }}
-            >
-              {line.text}
-            </motion.p>
-          ) : (
-            <motion.div
-              key="all"
-              className="flex flex-col gap-10"
-              initial="hidden"
-              animate="shown"
-              exit={{ opacity: 0, transition: { duration: 0.3 } }}
-              variants={{
-                shown: {
-                  transition: pulledBack ? { staggerChildren: 0.4, delayChildren: 1.5 } : {},
-                },
-              }}
-            >
-              {HAGEN_LINES.map((l) => (
-                <motion.p
-                  key={l.step}
-                  className={l.className}
-                  variants={{
-                    hidden: { opacity: 0, y: 18 },
-                    shown: { opacity: 1, y: 0, transition: { duration: 0.7 } },
-                  }}
-                >
-                  {l.text}
-                </motion.p>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <BonsaiJourney step="overview" active />
+      <div className="absolute inset-y-0 left-32 flex flex-col justify-center gap-10 whitespace-nowrap text-left">
+        {HAGEN_LINES.map((l) => (
+          <p key={l.text} className={l.className}>
+            {l.text}
+          </p>
+        ))}
       </div>
-      {HAGEN_STEPS.slice(1).map((s) => (
-        <span key={s} className="fragment" aria-hidden="true" style={{ display: 'none' }} />
-      ))}
     </div>
   );
 }
 
 export default function AktFaglunsj() {
+  // The talk's own palette (see globals.css); light, so it holds up in a bright lunch room.
+  useLayoutEffect(() => {
+    const html = document.documentElement;
+    const wasDark = html.classList.contains('dark');
+    html.classList.add('theme-vevstue');
+    html.classList.remove('dark');
+    return () => {
+      html.classList.remove('theme-vevstue');
+      html.classList.toggle('dark', wasDark);
+    };
+  }, []);
   return (
     <DeckShell notes={notes}>
       {/* ───────────── Åpning (begge, 0–3) ───────────── */}
@@ -423,7 +347,7 @@ export default function AktFaglunsj() {
       </Slide>
 
       <Slide id="ringer-i-bevegelse" autoAnimate>
-        <RingsSlide mode="drift" />
+        <RingsSlide />
       </Slide>
 
       <Slide id="kontekstdrift">
@@ -450,12 +374,6 @@ export default function AktFaglunsj() {
         </div>
       </Slide>
 
-      <Slide id="hva-er-veddemaalet" transition="fade">
-        <div className="flex h-[1080px] flex-col items-center justify-center gap-10 px-32 text-center">
-          <p className="text-primary-foreground text-8xl">Og med AI?</p>
-        </div>
-      </Slide>
-
       {/* ───────────── Akt 3: Hva AI gjør med samarbeidet (Mathias, 14–20) ───────────── */}
 
       <Slide id="better-call-claude" transition="fade">
@@ -474,7 +392,9 @@ export default function AktFaglunsj() {
       </Slide>
 
       <Slide id="agent-ringer">
-        <RingsSlide mode="agent" />
+        <div className="flex h-[1080px] items-center justify-center">
+          <Image src="/slides/programmering-11.svg" fit="contain" className="h-[880px] w-[880px]" />
+        </div>
       </Slide>
 
       <Slide id="menneske-vs-agent">
@@ -485,6 +405,7 @@ export default function AktFaglunsj() {
               <li>Langsom</li>
               <li>Dyp</li>
               <li>Taus kontekst</li>
+              <li>Fortid, nå og fremtid</li>
             </ul>
           </div>
           <div className="flex-1">
@@ -493,6 +414,7 @@ export default function AktFaglunsj() {
               <li>Rask</li>
               <li>Tynn</li>
               <li>Eksplisitt kontekst</li>
+              <li>Bare nå</li>
             </ul>
           </div>
         </div>
@@ -535,55 +457,9 @@ export default function AktFaglunsj() {
         </div>
       </Slide>
 
-      <Slide id="felles-prosjekt">
-        <div className="flex h-[1080px] flex-col items-center justify-center gap-12">
-          <h2 className="text-primary-foreground text-6xl">Felles prosjekt</h2>
-          <div className="border-border/40 bg-muted/40 w-[1300px] rounded-3xl border p-14 text-left">
-            <div className="mb-10 flex items-baseline justify-between">
-              <p className="text-primary-foreground text-5xl font-semibold">
-                Prosjekt: {SHARED_PROJECT.name}
-              </p>
-              <p className="text-secondary-foreground text-3xl">
-                Delt med {SHARED_PROJECT.sharedWith}
-              </p>
-            </div>
-            <p className="text-secondary-foreground mb-5 text-2xl uppercase tracking-widest">
-              Instruksjoner
-            </p>
-            <ul className="text-primary-foreground mb-12 list-none space-y-5 text-4xl leading-snug">
-              {SHARED_PROJECT.instructions.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-            <p className="text-secondary-foreground mb-5 text-2xl uppercase tracking-widest">
-              Kunnskap
-            </p>
-            <div className="flex gap-6">
-              {SHARED_PROJECT.knowledge.map((file) => (
-                <span
-                  key={file}
-                  className="bg-muted text-secondary-foreground rounded-xl px-6 py-3 text-3xl"
-                >
-                  {file}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Slide>
-
-      <Slide id="rett-konteksten">
-        <div className="flex h-[1080px] items-center justify-center">
-          <h2 className="text-primary-foreground text-8xl">Rett konteksten</h2>
-        </div>
-      </Slide>
-
-      <Slide id="tid-til-valg">
-        <div className="flex h-[1080px] flex-col items-center justify-center gap-16 px-28 text-center">
-          <div className="flex flex-col gap-6">
-            <p className="text-primary-foreground text-7xl">Om oversettelse er billig,</p>
-            <p className="text-primary-foreground text-7xl">blir ikke valget billig.</p>
-          </div>
+      <Slide id="hva-er-felles-kontekst">
+        <div className="h-[1080px]">
+          <TeamSlide mode="pull" sharedLabel="? ? ?" />
         </div>
       </Slide>
 
@@ -625,8 +501,9 @@ export default function AktFaglunsj() {
 
       <Slide id="close" transition="fade">
         <div className="flex h-[1080px] flex-col items-center justify-center gap-14 px-32 text-center">
-          <p className="text-secondary-foreground text-5xl">Hvordan samarbeider vi nå?</p>
-          <p className="text-primary-foreground text-8xl leading-tight">Felles kontekst</p>
+          <p className="text-primary-foreground text-8xl leading-tight">
+            Hvordan samarbeider vi nå?
+          </p>
         </div>
       </Slide>
 
@@ -640,8 +517,7 @@ export default function AktFaglunsj() {
           <ul className="text-primary-foreground list-none space-y-12 text-5xl leading-snug">
             <li>Hvem beskjærer konteksten hos dere?</li>
             <li>Hva vet du som ikke står skrevet noe sted?</li>
-            <li>Hvilket møte kunne vært et dokument?</li>
-            <li className="text-secondary-foreground">Hver for dere eller sammen?</li>
+            <li>Hver for oss eller sammen?</li>
           </ul>
         </div>
       </Slide>

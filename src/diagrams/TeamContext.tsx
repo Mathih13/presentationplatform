@@ -19,7 +19,7 @@ const FONT = 'Open Sans, system-ui, sans-serif';
 const FG = 'hsl(var(--foreground))';
 const MUTED = 'hsl(var(--muted-foreground))';
 const HUMAN = 'hsl(var(--chart-2))';
-const AGENT = '#d97757';
+const AGENT = 'hsl(var(--primary))';
 
 const BUBBLE_R = 200;
 const ORB_OFFSET = 170;
@@ -306,7 +306,16 @@ function AgentOrb({
 
 // ── The diagram ─────────────────────────────────────────────────────────────────────────
 
-export function TeamContext({ mode, active }: { mode: TeamMode; active: boolean }) {
+export function TeamContext({
+  mode,
+  active,
+  sharedLabel = 'Teamets kontekst',
+}: {
+  mode: TeamMode;
+  active: boolean;
+  /** Text in the shared-context box (pull mode). */
+  sharedLabel?: string;
+}) {
   const withAgent = mode !== 'push';
   return (
     <svg
@@ -394,7 +403,7 @@ export function TeamContext({ mode, active }: { mode: TeamMode; active: boolean 
             fontFamily={FONT}
             fontWeight={700}
           >
-            Teamets kontekst
+            {sharedLabel}
           </text>
         </g>
       )}

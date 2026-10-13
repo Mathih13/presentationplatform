@@ -78,6 +78,35 @@
   }
 }
 
+/* «Vevstue»: linen paper, dark ink, a red thread for the agents and indigo for the people.
+   Set by a talk on <html>; overrides both the light and the dark palette. */
+:root.theme-vevstue {
+  --background: 39 37% 93%;
+  --foreground: 27 12% 15%;
+  --card: 39 37% 93%;
+  --card-foreground: 27 12% 15%;
+  --popover: 39 37% 93%;
+  --popover-foreground: 27 12% 15%;
+  --primary: 9 59% 45%;
+  --primary-foreground: 27 12% 15%;
+  --secondary: 38 29% 87%;
+  --secondary-foreground: 30 8% 33%;
+  --muted: 38 29% 87%;
+  --muted-foreground: 30 8% 33%;
+  --accent: 38 29% 87%;
+  --accent-foreground: 27 12% 30%;
+  --destructive: 9 59% 45%;
+  --destructive-foreground: 39 37% 93%;
+  --border: 35 18% 74%;
+  --input: 35 18% 74%;
+  --ring: 9 59% 45%;
+  --chart-1: 9 59% 45%;
+  --chart-2: 216 40% 34%;
+  --chart-3: 35 18% 74%;
+  --chart-4: 38 29% 87%;
+  --chart-5: 92 20% 51%;
+}
+
 html,
 body,
 #root {

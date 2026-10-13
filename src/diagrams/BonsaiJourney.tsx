@@ -29,8 +29,8 @@ const SHOOT = '#b8d39c';
 const MOSS = '#8fa876';
 const POT = '#a0735a';
 const POT_DARK = '#7d5844';
-const SOIL = '#3b4252';
-const SOIL_GRAIN = '#2e3440';
+const SOIL = '#5c4a3a';
+const SOIL_GRAIN = '#4a3b2e';
 const STEEL = '#e5e9f0';
 const HANDLE = '#bf616a';
 
@@ -42,7 +42,7 @@ const VIEWS: Record<Stage, View> = {
   roots: { x: 292, y: 1020, w: 820 },
   trunk: { x: -55, y: 360, w: 1400 },
   prune: { x: 492, y: 350, w: 820 },
-  overview: { x: -270, y: 335, w: 1867 },
+  overview: { x: -865, y: 252, w: 2145 },
 };
 const viewBox = ({ x, y, w }: View) => `${x} ${y} ${w} ${(w * 9) / 16}`;
 const GLIDE: [number, number, number, number] = [0.65, 0, 0.35, 1];
@@ -336,7 +336,7 @@ export function BonsaiJourney({ step, active }: { step: JourneyStep; active: boo
           fill="none"
           strokeLinecap="round"
           initial={false}
-          animate={{ opacity: stage === 'overview' ? 0.26 : 1 }}
+          animate={{ opacity: stage === 'overview' ? 0.4 : 1 }}
           transition={
             stage === 'overview' && forward
               ? { duration: 1.8, delay: 0.7, ease: 'easeInOut' }
