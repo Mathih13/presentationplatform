@@ -37,6 +37,12 @@ export function DeckShell({ children, notes }: DeckShellProps) {
     }
   }, [speakerNotes]);
 
+  // The speaker window only re-reads notes on reveal events (slide change, pause, …), so give
+  // it one when the notes change, e.g. after the notes file is saved.
+  useEffect(() => {
+    reveal?.dispatchEvent({ type: 'resumed' });
+  }, [reveal, speakerNotes]);
+
   const setDark = useCallback((dark: boolean) => {
     setIsDarkState(dark);
     if (typeof document !== 'undefined') {

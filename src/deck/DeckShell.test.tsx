@@ -9,6 +9,7 @@ interface MockRevealInstance {
   inited: boolean;
   destroyed: boolean;
   listeners: Map<string, Set<(payload?: unknown) => void>>;
+  dispatched: string[];
 }
 
 const mockState = vi.hoisted(() => {
@@ -45,6 +46,11 @@ vi.mock('reveal.js', () => {
     };
 
     getIndices = () => ({ h: 0, v: 0, f: -1 });
+
+    dispatched: string[] = [];
+    dispatchEvent = ({ type }: { type: string }) => {
+      this.dispatched.push(type);
+    };
 
     on = (event: string, fn: (payload?: unknown) => void) => {
       if (!this.listeners.has(event)) this.listeners.set(event, new Set());
@@ -178,6 +184,24 @@ describe('DeckShell speaker notes', () => {
       </DeckShell>
     );
     expect(container.querySelector('#intro aside.notes')!.innerHTML).toBe('Inline');
+  });
+
+  it('nudges the speaker window when the notes change', async () => {
+    const { rerender } = render(
+      <DeckShell notes={'## intro\nBefore'}>
+        <Slide id="intro">Intro</Slide>
+      </DeckShell>
+    );
+    await waitFor(() => expect(mockState.instances).toHaveLength(1));
+    const instance = mockState.instances[0]!;
+    instance.dispatched.length = 0;
+
+    rerender(
+      <DeckShell notes={'## intro\nAfter'}>
+        <Slide id="intro">Intro</Slide>
+      </DeckShell>
+    );
+    expect(instance.dispatched).toEqual(['resumed']);
   });
 
   it('warns about notes for slides that do not exist', () => {

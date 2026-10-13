@@ -62,6 +62,7 @@ vi.mock('reveal.js', () => {
 
     getCurrentSlide = () => this.currentSlide;
     getIndices = () => this.currentIndices;
+    dispatchEvent = () => {};
 
     fire = (event: string, payload?: unknown) => {
       this.listeners.get(event)?.forEach((fn) => fn(payload));
