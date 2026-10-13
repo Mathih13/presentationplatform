@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, type TargetAndTransition, type Transition } from 'motion/react';
+import { pivot, type Pt } from './pivot';
+import { PivotSpace } from './PivotSpace';
 
 // A camera journey through an illustrated bonsai — the garden payoff.
 //
@@ -17,8 +19,6 @@ type Stage = 'dark' | JourneyStep; // 'dark' = the slide hasn't been presented y
 
 const ORDER: Stage[] = ['dark', 'roots', 'trunk', 'prune', 'overview'];
 const rank = (s: Stage) => ORDER.indexOf(s);
-
-type Pt = { x: number; y: number };
 
 const BARK = '#8c6b52';
 const BARK_LIGHT = '#a8876b';
@@ -158,10 +158,6 @@ const popSpring = (delay: number): Transition => ({
   stiffness: 260,
   damping: 26,
   delay,
-});
-const pivot = (p: Pt) => ({
-  transformBox: 'view-box' as const,
-  transformOrigin: `${p.x}px ${p.y}px`,
 });
 
 const TREE_BOING: TargetAndTransition = {
@@ -335,199 +331,206 @@ export function BonsaiJourney({ step, active }: { step: JourneyStep; active: boo
       animate={{ viewBox: viewBox(VIEWS[stage]) }}
       transition={camera}
     >
-      <motion.g
-        fill="none"
-        strokeLinecap="round"
-        initial={false}
-        animate={{ opacity: stage === 'overview' ? 0.26 : 1 }}
-        transition={
-          stage === 'overview' && forward ? { duration: 1.8, delay: 0.7, ease: 'easeInOut' } : SNAP
-        }
-      >
-        {/* cutaway pot with soil — the stage for the roots */}
-        <path d={POT_SHELL} fill={POT_DARK} />
-        <path d={POT_SOIL} fill={SOIL} />
-        {SOIL_GRAINS.map((g) => (
-          <circle key={`${g.x}-${g.y}`} cx={g.x} cy={g.y} r={g.r} fill={SOIL_GRAIN} />
-        ))}
-        <rect x={478} y={1176} width={30} height={18} rx={4} fill={POT} />
-        <rect x={1092} y={1176} width={30} height={18} rx={4} fill={POT} />
-        <rect x={588} y={1316} width={54} height={16} rx={3} fill={POT_DARK} />
-        <rect x={958} y={1316} width={54} height={16} rx={3} fill={POT_DARK} />
-
-        {/* roots growing through the soil */}
-        {ROOTS.map((r, i) => (
-          <motion.path
-            key={r.d}
-            d={r.d}
-            stroke={ROOT}
-            strokeWidth={r.w}
-            initial={false}
-            animate={grown(rootsOn)}
-            transition={t('roots', grow(0.4 + i * 0.28, 1.4))}
-          />
-        ))}
-        {ROOTLETS.map((d, i) => (
-          <motion.path
-            key={d}
-            d={d}
-            stroke={ROOT}
-            strokeWidth={5}
-            initial={false}
-            animate={grown(rootsOn)}
-            transition={t('roots', grow(1.5 + i * 0.18, 0.7))}
-          />
-        ))}
-
-        {/* the tree, with a little boing once it has grown */}
+      <PivotSpace>
         <motion.g
-          style={pivot(TRUNK_BASE)}
+          fill="none"
+          strokeLinecap="round"
           initial={false}
-          animate={growingTree ? TREE_BOING : AT_REST}
+          animate={{ opacity: stage === 'overview' ? 0.26 : 1 }}
+          transition={
+            stage === 'overview' && forward
+              ? { duration: 1.8, delay: 0.7, ease: 'easeInOut' }
+              : SNAP
+          }
         >
-          {NEBARI.map((d) => (
+          {/* cutaway pot with soil — the stage for the roots */}
+          <path d={POT_SHELL} fill={POT_DARK} />
+          <path d={POT_SOIL} fill={SOIL} />
+          {SOIL_GRAINS.map((g) => (
+            <circle key={`${g.x}-${g.y}`} cx={g.x} cy={g.y} r={g.r} fill={SOIL_GRAIN} />
+          ))}
+          <rect x={478} y={1176} width={30} height={18} rx={4} fill={POT} />
+          <rect x={1092} y={1176} width={30} height={18} rx={4} fill={POT} />
+          <rect x={588} y={1316} width={54} height={16} rx={3} fill={POT_DARK} />
+          <rect x={958} y={1316} width={54} height={16} rx={3} fill={POT_DARK} />
+
+          {/* roots growing through the soil */}
+          {ROOTS.map((r, i) => (
+            <motion.path
+              key={r.d}
+              d={r.d}
+              stroke={ROOT}
+              strokeWidth={r.w}
+              initial={false}
+              animate={grown(rootsOn)}
+              transition={t('roots', grow(0.4 + i * 0.28, 1.4))}
+            />
+          ))}
+          {ROOTLETS.map((d, i) => (
             <motion.path
               key={d}
               d={d}
-              stroke={BARK}
-              strokeWidth={22}
+              stroke={ROOT}
+              strokeWidth={5}
               initial={false}
-              animate={grown(treeOn)}
-              transition={t('trunk', grow(0.05, 0.4))}
-            />
-          ))}
-          {TRUNK.map((seg) => (
-            <motion.path
-              key={seg.d}
-              d={seg.d}
-              stroke={BARK}
-              strokeWidth={seg.w}
-              initial={false}
-              animate={grown(treeOn)}
-              transition={t('trunk', grow(seg.at, seg.dur))}
-            />
-          ))}
-          <motion.path
-            d={BARK_STREAK}
-            stroke={BARK_LIGHT}
-            strokeWidth={10}
-            initial={false}
-            animate={grown(treeOn)}
-            transition={t('trunk', grow(0.9, 0.8))}
-          />
-          {BRANCHES.map((b) => (
-            <motion.path
-              key={b.d}
-              d={b.d}
-              stroke={BARK}
-              strokeWidth={b.w}
-              initial={false}
-              animate={grown(treeOn)}
-              transition={t('trunk', grow(b.at, 0.6))}
+              animate={grown(rootsOn)}
+              transition={t('roots', grow(1.5 + i * 0.18, 0.7))}
             />
           ))}
 
-          {/* the wild branch: grows with the tree, snapped off when pruned */}
-          <AnimatePresence custom={arriving('prune')}>
-            {rank(stage) <= rank('trunk') && (
-              <motion.g
-                key="wild"
-                style={pivot(CUT)}
-                custom={arriving('prune')}
-                variants={{ exit: (falling: boolean) => wildExit(falling) }}
-                exit="exit"
-              >
-                <motion.path
-                  d={WILD.limb}
-                  stroke={BARK}
-                  strokeWidth={12}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={grown(treeOn)}
-                  transition={wildTransition(WILD_AT, 0.8)}
-                />
-                {WILD.shoots.map((d, i) => (
+          {/* the tree, with a little boing once it has grown */}
+          <motion.g
+            style={pivot(TRUNK_BASE)}
+            initial={false}
+            animate={growingTree ? TREE_BOING : AT_REST}
+          >
+            {NEBARI.map((d) => (
+              <motion.path
+                key={d}
+                d={d}
+                stroke={BARK}
+                strokeWidth={22}
+                initial={false}
+                animate={grown(treeOn)}
+                transition={t('trunk', grow(0.05, 0.4))}
+              />
+            ))}
+            {TRUNK.map((seg) => (
+              <motion.path
+                key={seg.d}
+                d={seg.d}
+                stroke={BARK}
+                strokeWidth={seg.w}
+                initial={false}
+                animate={grown(treeOn)}
+                transition={t('trunk', grow(seg.at, seg.dur))}
+              />
+            ))}
+            <motion.path
+              d={BARK_STREAK}
+              stroke={BARK_LIGHT}
+              strokeWidth={10}
+              initial={false}
+              animate={grown(treeOn)}
+              transition={t('trunk', grow(0.9, 0.8))}
+            />
+            {BRANCHES.map((b) => (
+              <motion.path
+                key={b.d}
+                d={b.d}
+                stroke={BARK}
+                strokeWidth={b.w}
+                initial={false}
+                animate={grown(treeOn)}
+                transition={t('trunk', grow(b.at, 0.6))}
+              />
+            ))}
+
+            {/* the wild branch: grows with the tree, snapped off when pruned */}
+            <AnimatePresence custom={arriving('prune')}>
+              {rank(stage) <= rank('trunk') && (
+                <motion.g
+                  key="wild"
+                  style={pivot(CUT)}
+                  custom={arriving('prune')}
+                  variants={{ exit: (falling: boolean) => wildExit(falling) }}
+                  exit="exit"
+                >
                   <motion.path
-                    key={d}
-                    d={d}
+                    d={WILD.limb}
                     stroke={BARK}
-                    strokeWidth={6}
+                    strokeWidth={12}
                     initial={{ pathLength: 0, opacity: 0 }}
                     animate={grown(treeOn)}
-                    transition={wildTransition(WILD_AT + 0.5 + i * 0.15, 0.5)}
+                    transition={wildTransition(WILD_AT, 0.8)}
                   />
-                ))}
-                {WILD.tufts.map((tuft, i) => (
-                  <g
-                    key={`${tuft.x}-${tuft.y}`}
-                    transform={`translate(${tuft.x} ${tuft.y}) scale(${tuft.s})`}
-                  >
-                    <motion.g
-                      style={{ originX: 0.5, originY: 0.9 }}
-                      initial={{ scaleX: 0, scaleY: 0 }}
-                      animate={{ scaleX: treeOn ? 1 : 0, scaleY: treeOn ? 1 : 0 }}
-                      transition={
-                        growingTree
-                          ? squashSpring(WILD_AT + 0.9 + i * 0.15)
-                          : back
-                            ? squashSpring(0.3)
-                            : SNAP
-                      }
+                  {WILD.shoots.map((d, i) => (
+                    <motion.path
+                      key={d}
+                      d={d}
+                      stroke={BARK}
+                      strokeWidth={6}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={grown(treeOn)}
+                      transition={wildTransition(WILD_AT + 0.5 + i * 0.15, 0.5)}
+                    />
+                  ))}
+                  {WILD.tufts.map((tuft, i) => (
+                    <g
+                      key={`${tuft.x}-${tuft.y}`}
+                      transform={`translate(${tuft.x} ${tuft.y}) scale(${tuft.s})`}
                     >
-                      <circle cx={-22} cy={6} r={34} fill={SHOOT} />
-                      <circle cx={22} cy={-6} r={38} fill={SHOOT} />
-                      <circle cx={4} cy={22} r={28} fill={LEAF} />
-                    </motion.g>
-                  </g>
-                ))}
-              </motion.g>
-            )}
-          </AnimatePresence>
+                      <motion.g
+                        style={{ originX: 0.5, originY: 0.9 }}
+                        initial={{ scaleX: 0, scaleY: 0 }}
+                        animate={{ scaleX: treeOn ? 1 : 0, scaleY: treeOn ? 1 : 0 }}
+                        transition={
+                          growingTree
+                            ? squashSpring(WILD_AT + 0.9 + i * 0.15)
+                            : back
+                              ? squashSpring(0.3)
+                              : SNAP
+                        }
+                      >
+                        <circle cx={-22} cy={6} r={34} fill={SHOOT} />
+                        <circle cx={22} cy={-6} r={38} fill={SHOOT} />
+                        <circle cx={4} cy={22} r={28} fill={LEAF} />
+                      </motion.g>
+                    </g>
+                  ))}
+                </motion.g>
+              )}
+            </AnimatePresence>
 
-          {/* foliage pads: puffs bubble up on springs, then breathe */}
-          {PADS.map((pad, i) => (
-            <g key={`${pad.x}-${pad.y}`} transform={`translate(${pad.x} ${pad.y}) scale(${pad.s})`}>
-              <motion.g
-                style={{ originX: 0.5, originY: 1 }}
-                initial={false}
-                animate={
-                  treeOn && stage !== 'overview'
-                    ? { scaleX: [1, 1.015], scaleY: [1, 0.985] }
-                    : { scaleX: 1, scaleY: 1 }
-                }
-                transition={
-                  treeOn && stage !== 'overview'
-                    ? {
-                        duration: 2.6 + i * 0.35,
-                        ease: 'easeInOut',
-                        repeat: Infinity,
-                        repeatType: 'mirror',
-                        delay: growingTree ? pad.at + 1.4 : 0,
-                      }
-                    : SNAP
-                }
+            {/* foliage pads: puffs bubble up on springs, then breathe */}
+            {PADS.map((pad, i) => (
+              <g
+                key={`${pad.x}-${pad.y}`}
+                transform={`translate(${pad.x} ${pad.y}) scale(${pad.s})`}
               >
-                <Puffs on={treeOn} delay={pad.at} playing={growingTree} />
-              </motion.g>
-            </g>
+                <motion.g
+                  style={{ originX: 0.5, originY: 1 }}
+                  initial={false}
+                  animate={
+                    treeOn && stage !== 'overview'
+                      ? { scaleX: [1, 1.015], scaleY: [1, 0.985] }
+                      : { scaleX: 1, scaleY: 1 }
+                  }
+                  transition={
+                    treeOn && stage !== 'overview'
+                      ? {
+                          duration: 2.6 + i * 0.35,
+                          ease: 'easeInOut',
+                          repeat: Infinity,
+                          repeatType: 'mirror',
+                          delay: growingTree ? pad.at + 1.4 : 0,
+                        }
+                      : SNAP
+                  }
+                >
+                  <Puffs on={treeOn} delay={pad.at} playing={growingTree} />
+                </motion.g>
+              </g>
+            ))}
+          </motion.g>
+
+          {/* moss on the soil surface, once the tree is up */}
+          {MOSS_DOTS.map((m, i) => (
+            <motion.circle
+              key={`${m.x}-${m.y}`}
+              cx={m.x}
+              cy={m.y}
+              r={m.r}
+              fill={MOSS}
+              initial={false}
+              animate={{ scale: treeOn ? 1 : 0 }}
+              transition={growingTree ? popSpring(2.8 + i * 0.08) : SNAP}
+            />
           ))}
+
+          {arriving('prune') && <Scissors />}
         </motion.g>
-
-        {/* moss on the soil surface, once the tree is up */}
-        {MOSS_DOTS.map((m, i) => (
-          <motion.circle
-            key={`${m.x}-${m.y}`}
-            cx={m.x}
-            cy={m.y}
-            r={m.r}
-            fill={MOSS}
-            initial={false}
-            animate={{ scale: treeOn ? 1 : 0 }}
-            transition={growingTree ? popSpring(2.8 + i * 0.08) : SNAP}
-          />
-        ))}
-
-        {arriving('prune') && <Scissors />}
-      </motion.g>
+      </PivotSpace>
     </motion.svg>
   );
 }
