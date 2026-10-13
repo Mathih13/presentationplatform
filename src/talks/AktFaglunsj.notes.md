@@ -5,9 +5,7 @@ Tom linje gir nytt avsnitt, **fet** og *kursiv* virker. Lagre, så oppdateres ta
 
 ## title
 
-Kort hvem vi er — én utvikler, én engineering manager med produkteier-blod.
 
-Bro (Mathias): «For å svare på hvordan vi samarbeider nå, må vi først se på hva samarbeid egentlig er. Og det starter i et veveri i Ytre Arna.»
 
 ## arne-fabrikker
 
@@ -54,7 +52,7 @@ En leder som virkelig ville forstå utviklerne, sa en gang at programvare er som
 
 Det som driver er passformen mellom arbeidet og forståelsen rundt det. *(Hold på hagen — den kommer tilbake, som en bonsai.)*
 
-→ Overlevering til kollega.
+→ Overlevering til Nicklas.
 
 ## metodikk-veddemaal
 
@@ -78,6 +76,8 @@ Erfarne utviklere som lever i koden time for time synes ofte standup er bortkast
 Men standupen er ikke for deg. Den er for produkteieren som kommer innom én gang i uka, for nyansatte, for drift.
 
 Det er prisen av agile: de som deler og de som får nytte er ikke de samme.
+
+→ Overlevering til Nicklas.
 
 ## better-call-claude
 
@@ -131,6 +131,8 @@ Push modellen fra agilt trenger en oppdatering.
 
 *Animasjonen:* ritualene passerer «nå» med noen sekunders mellomrom; agent-strømmen under er tett. Innen neste standup har dusinvis av endringer gått forbi.
 
+→ Overlevering til Nicklas.
+
 ## tredje-veddemaal
 
 Tilbake til det tomme feltet. Det tredje veddemålet er **pull**: konteksten bor ett sted, eksplisitt, og hele teamet eier den. I stedet for å samles og dele, henter mennesker og agenter det de trenger når de trenger det.
@@ -159,12 +161,16 @@ Dette er det vi jobber med i dag. Hvordan kan vi skape en løsning som lar team 
 
 Så hva betyr det for hver rolle? Venstre kolonne er det agenten gjør for deg alene — fortsett med det. Høyre kolonne er beskjæringen: slik eier du din del av den felles konteksten.
 
+→ Overlevering til Mathias.
+
 
 ## rollene-skiller-seg
 
 Tilbake til veveriet. I lang tid slo vi de tre rollene sammen og kalte det «programmerer» — en historisk tilfeldighet som varte så lenge at vi glemte at de var separate.
 
 Nå skiller de seg igjen. Oversettelsen blir billig, utførelsen har vært automatisk lenge. Mønsterdesignet står igjen: forståelsen. Men den får ikke plass i ett hode lenger.
+
+→ Overlevering til Nicklas.
 
 ## close
 
