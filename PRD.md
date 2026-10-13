@@ -145,7 +145,7 @@ Held out (per-clone additions when needed): KaTeX, shadcn components, any chart 
 
 **Component primitives** (not unit-tested individually — visual concerns):
 
-5. **`Slide`** — wraps children in a `<section>` with optional `notes`, `transition`, `autoAnimate`, `id` props. The `notes` prop renders an `<aside class="notes">` child so reveal's Notes plugin picks it up.
+5. **`Slide`** — wraps children in a `<section>` with optional `notes`, `transition`, `autoAnimate`, `id` props. Notes render as an `<aside class="notes">` child so reveal's Notes plugin picks them up; they come from the `notes` prop, or else from the slide's section of the talk's notes file.
 6. **`Diagram`** — themed `<svg>` wrapper with a default viewBox (typically 1920×1080 or a configurable subregion). Injects palette colors derived from `chart-1..5` via CSS custom properties.
 7. **`AnimatedArrow`** — props: `from`, `to` (each accepts a point `{x,y}` or a ref to a DOM/SVG element), `appear` (`"draw" | "fade" | "slide"`), `strokeWidth`, `color` (token name). Implements draw-on via stroke-dasharray; movement via SVG `transform`.
 8. **`AnimatedBox`** — labeled rectangle with named states (`idle`, `highlight`, `dim`). State driven by `useFragment()` plus an `activeAt` prop (fragment index or range).
@@ -162,7 +162,7 @@ Held out (per-clone additions when needed): KaTeX, shadcn components, any chart 
 
 (Conceptual — final TypeScript signatures decided during implementation.)
 
-- `<DeckShell>{slides}</DeckShell>` — no props at the top level; configuration lives in the reveal config module.
+- `<DeckShell notes={markdown}>{slides}</DeckShell>` — `notes` is optional; other configuration lives in the reveal config module.
 - `useFragment(): { index: number; total: number; isVisible: (n: number) => boolean }`
 - `useStep(['idle', 'shown', 'done'] as const): 'idle' | 'shown' | 'done'` — the slide's fragment progress as a named step, for Motion's `animate`.
 - `useSlideActive(): boolean` — whether this slide is the one being presented; gate Motion entrance animations on it, since every slide mounts at deck load.
@@ -186,7 +186,10 @@ Held out (per-clone additions when needed): KaTeX, shadcn components, any chart 
 
 ### Speaker notes
 
-- Notes authored via `<Slide notes="...">` (renders `<aside class="notes">`).
+- Notes live in one Markdown file per talk, next to the deck (`MyTalk.notes.md`), imported with Vite's `?raw` and passed as `<DeckShell notes={notes}>`. Each `## slide-id` heading starts that slide's notes; paragraphs, line breaks, `**bold**`, `*italics*`, `-` lists and raw HTML are supported. Editing the file updates the speaker view live.
+- Why a file rather than props: notes are prose, and prose is easier to write and review outside JSX, without HTML escaping.
+- A heading that matches no slide logs a console warning, so a typo or a removed slide doesn't silently drop notes.
+- `<Slide notes="...">` (HTML) still works and wins over the file, for one-off decks.
 - Notes plugin registered in `DeckShell`. `s` key opens the speaker view as standard.
 
 ### PDF export

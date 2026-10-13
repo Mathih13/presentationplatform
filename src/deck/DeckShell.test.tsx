@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { StrictMode } from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { Slide } from './Slide';
 
 interface MockRevealInstance {
   root: HTMLElement;
@@ -151,5 +152,42 @@ describe('DeckShell lifecycle', () => {
     const second = mockState.instances[1]!;
     expect(second).not.toBe(first);
     expect(second.destroyed).toBe(false);
+  });
+});
+
+describe('DeckShell speaker notes', () => {
+  it('gives each slide its section of the notes file', () => {
+    const { container } = render(
+      <DeckShell notes={'## intro\nSay **hi**\n\n## outro\nBye'}>
+        <Slide id="intro">Intro</Slide>
+        <Slide id="outro">Outro</Slide>
+      </DeckShell>
+    );
+    expect(container.querySelector('#intro aside.notes')!.innerHTML).toBe(
+      '<p>Say <strong>hi</strong></p>'
+    );
+    expect(container.querySelector('#outro aside.notes')!.innerHTML).toBe('<p>Bye</p>');
+  });
+
+  it("prefers a slide's own notes prop over the file", () => {
+    const { container } = render(
+      <DeckShell notes={'## intro\nFrom the file'}>
+        <Slide id="intro" notes="Inline">
+          Intro
+        </Slide>
+      </DeckShell>
+    );
+    expect(container.querySelector('#intro aside.notes')!.innerHTML).toBe('Inline');
+  });
+
+  it('warns about notes for slides that do not exist', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(
+      <DeckShell notes={'## intro\nHi\n\n## gone\nOld'}>
+        <Slide id="intro">Intro</Slide>
+      </DeckShell>
+    );
+    expect(warn).toHaveBeenCalledWith("Speaker notes for slides that don't exist: gone");
+    warn.mockRestore();
   });
 });
