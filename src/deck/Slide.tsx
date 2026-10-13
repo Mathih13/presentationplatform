@@ -1,11 +1,13 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { NotesContext } from './notesContext';
 import { SlideContext } from './slideContext';
 
 export type SlideTransition = 'none' | 'fade' | 'slide' | 'convex' | 'concave' | 'zoom';
 
 export interface SlideProps {
   children?: ReactNode;
+  /** Notes as HTML. Without it, the slide uses its section from the talk's notes file. */
   notes?: string;
   transition?: SlideTransition;
   autoAnimate?: boolean;
@@ -26,6 +28,8 @@ export function Slide({
   id,
 }: SlideProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const fromFile = useContext(NotesContext);
+  const html = notes ?? (id ? fromFile[id] : undefined);
   return (
     <SlideContext.Provider value={{ sectionRef }}>
       <section
@@ -39,9 +43,9 @@ export function Slide({
         data-auto-animate-delay={autoAnimateDelay}
       >
         {children}
-        {notes ? (
+        {html ? (
           // Rendered as HTML so notes can contain markup like <br/>, <strong>, <ul>, etc.
-          <aside className="notes" dangerouslySetInnerHTML={{ __html: notes }} />
+          <aside className="notes" dangerouslySetInnerHTML={{ __html: html }} />
         ) : null}
       </section>
     </SlideContext.Provider>
